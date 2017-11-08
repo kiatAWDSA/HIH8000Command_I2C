@@ -22,17 +22,17 @@ For an example, see the examples folder.
 5. Immediately after that, call the begin() function for your HIH8000CommandI2C object
 
 #### Summary of available functions:
-###### Entering/exiting command mode:
+Entering/exiting command mode:
 - begin()     : Starts command mode. Returns true if successful; false if not.
 - end()       : Exits command mode.
 
-###### These functions will return the limits for the low/high alarms in relative humidity (%) values. If something went wrong, they return -1:
+These functions will return the limits for the low/high alarms in relative humidity (%) values. If something went wrong, they return -1:
 - readAlarmHighOn()
 - readAlarmHighOff()
 - readAlarmLowOn()
 - readAlarmLowOff()
 
-###### These functions change various settings of the sensor. They return true if successful; false if not:
+These functions change various settings of the sensor. They return true if successful; false if not:
 - changeAlarmHighOn(float humidityValue)
 - changeAlarmHighOff(float humidityValue)
 - changeAlarmLowOn(float humidityValue)
@@ -44,7 +44,7 @@ For an example, see the examples folder.
 - changeAlarmHighOutput(bool openDrain)
 - changeStartupTimeWindow(bool setTo3ms)
 
-###### A few notes about using the functions:
+A few notes about using the functions:
 - humidity values must be at least 0 and at most 100 (i.e. in percentage form).
 - address values must be at least 0 and at most 127 (i.e. 7-bits).
 - If true is passed to the functions that modify alarm polarity, then the corresponding alarm pin will output LOW when alarm is triggered. If false is passed, the alarm pin will output HIGH.
