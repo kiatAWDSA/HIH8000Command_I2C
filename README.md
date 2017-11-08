@@ -27,7 +27,7 @@ Reading/modifying sensor internal settings:
 Below is a summary of the available functions.
 
 begin()     : Starts command mode. Returns true if successful; false if not.
-void end()  : Exits command mode.
+end()       : Exits command mode.
 
 These functions will return the limits for the low/high alarms in relative humidity (%) values. If something went wrong, they return -1.
 - readAlarmHighOn()
@@ -36,13 +36,20 @@ These functions will return the limits for the low/high alarms in relative humid
 - readAlarmLowOff()
 
 These functions change various settings of the sensor. They return true if successful; false if not.
-- changeAlarmHighOn(float humidityValue)    : humidityValue must be at least 0 and at most 100.
-- changeAlarmHighOff(float humidityValue)   : humidityValue must be at least 0 and at most 100.
-- changeAlarmLowOn(float humidityValue)     : humidityValue must be at least 0 and at most 100.
-- changeAlarmLowOff(float humidityValue)    : humidityValue must be at least 0 and at most 100.
-- changeAddress(uint8_t newAddress)         : address values must be at least 0 and at most 127.
+- changeAlarmHighOn(float humidityValue)
+- changeAlarmHighOff(float humidityValue)
+- changeAlarmLowOn(float humidityValue)
+- changeAlarmLowOff(float humidityValue)
+- changeAddress(uint8_t newAddress)
 - changeAlarmLowPolarity(bool lowPolarity)
 - changeAlarmLowOutput(bool openDrain)
 - changeAlarmHighPolarity(bool lowPolarity)
 - changeAlarmHighOutput(bool openDrain)
 - changeStartupTimeWindow(bool setTo3ms)
+
+A few notes about using the functions:
+- humidity values must be at least 0 and at most 100 (i.e. in percentage form).
+- address values must be at least 0 and at most 127 (i.e. 7-bits).
+- If true is passed to the functions that modify alarm polarity, then the corresponding alarm pin will output LOW when alarm is triggered. If false is passed, the alarm pin will output HIGH.
+- If true is passed to the functions that modify alarm output, then the corresponding alarm pin will emulate open drain output. If false is passed, it will emulate push-pull output.
+- If true is passed to the changeStartupTimeWindow, the time window for entering command mode when the sensor is powered on will be changed to 3 ms. If false is passed, it will be 10 ms.
