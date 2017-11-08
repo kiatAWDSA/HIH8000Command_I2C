@@ -14,15 +14,14 @@ Useful documents (the third document is especially useful if you want to modify 
 # Instructions for use with Arduino boards
 For an example, see the examples folder.
 
-Setting up:
+#### Setting up:
 1. Connect the sensor to the appropriate Arduino pins using the recommended configuration (pg 10 of the datasheet)
 2. Include Wire.h and HIH8000_I2C.h at the top of your Arduino code
 3. Initialize a HIH8000Command_I2C object with the address of your sensor (default address is 0x27)
 4. In the setup section of your Arduino code, call Wire.begin()
 5. Immediately after that, call the begin() function for your HIH8000CommandI2C object
 
-Summary of available functions:
-
+#### Summary of available functions:
 Entering/exiting command mode
 - begin()     : Starts command mode. Returns true if successful; false if not.
 - end()       : Exits command mode.
