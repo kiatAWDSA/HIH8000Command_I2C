@@ -1,8 +1,10 @@
 # HIH8000Command_I2C
 Utilize the "command mode" to modify the internal settings of a Honeywell HIH8000 Series sensor connected to an Arduino board using I2C protocol (not SPI):
+
 https://sensing.honeywell.com/sensors/humidity-sensors/HIH8000-series
 
 To acquire humidity and temperature data, use the HIH8000 library instead:
+
 https://github.com/kiatAWDSA/HIH8000_I2C
 
 NOTE: This library will only work for the variants of the Honeywell HIH8000 Series sensors that utilize the I2C protocol.
@@ -24,9 +26,11 @@ Setting up:
 5. Immediately after that, call the begin() function for your HIH8000CommandI2C object
 
 Reading/modifying sensor internal settings:
+
 Below is a summary of the available functions.
 
 begin()     : Starts command mode. Returns true if successful; false if not.
+
 end()       : Exits command mode.
 
 These functions will return the limits for the low/high alarms in relative humidity (%) values. If something went wrong, they return -1.
