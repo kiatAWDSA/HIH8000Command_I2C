@@ -85,6 +85,8 @@ void loop() {
         {
           Serial.println("Something went wrong..");
         }
+
+        serialCommand[0] = 'i';
         break;
 
       case 'u':
@@ -96,6 +98,8 @@ void loop() {
         {
           Serial.println("Something went wrong..");
         }
+
+        serialCommand[0] = 'i';
         break;
         
       case 'i':
@@ -107,6 +111,8 @@ void loop() {
         {
           Serial.println("Something went wrong..");
         }
+
+        serialCommand[0] = 'i';
         break;
 
       case 'k':
@@ -118,6 +124,8 @@ void loop() {
         {
           Serial.println("Something went wrong..");
         }
+
+        serialCommand[0] = 'i';
         break;
 
       case 'l':
@@ -129,10 +137,14 @@ void loop() {
         {
           Serial.println("Something went wrong..");
         }
+
+        serialCommand[0] = 'i';
         break;
       
       default:
         Serial.println("Invalid command");
+
+        serialCommand[0] = 'i';
         break;
     }
   }
