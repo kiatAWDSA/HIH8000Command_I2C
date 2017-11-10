@@ -13,7 +13,9 @@
   1. Connect your sensor according to the recommended layout in pg10 of the datasheet
      linked above. Make sure the SDA and SCL pins of the sensor are connected to the
      appropriate pins on your Arduino board (see above link to the Wire documentation).
-  2. Open your serial monitor and send any of the following commands:
+  2. Connect >220 Ohm resistor between pin 7 and the 3V line (so it forms parallel
+     connection with the HIH8000 sensor).
+  3. Open your serial monitor and send any of the following commands:
         aXXX      : Change the I2C address of the sensor to XXX (Must be <= 127).
         uXXX.XX   : Change the upper limit of the zone that triggers the high alarm
                     (Alarm_High_On) to XXX.XX. 0 <= XXX.XX <= 100. Max 2 decimal places.
@@ -50,6 +52,7 @@
 
 HIH8000Command_I2C hihSensor = HIH8000Command_I2C(0x27);
 
+bool inCommandMode = false;
 bool newCommand = false;
 byte readData = 0;
 char serialCommand[2];
@@ -57,108 +60,125 @@ char serialData[7];
 
 void setup() {
   // put your setup code here, to run once:
+  pinMode(7, INPUT);
   Wire.begin();
   Wire.setClock(100000);
   Serial.begin(9600);
-  hihSensor.begin();
+  Serial.setTimeout(50);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if (newCommand)
+  if (!inCommandMode)
   {
-    char trimmedData[readData];
+    if (digitalRead(7)) {
+      inCommandMode = hihSensor.begin();
 
-    for (byte i = 0; i < readData; i++) {
-      trimmedData[i] = serialData[i];
+      if (inCommandMode) {
+        Serial.println("Entered command mode");
+      } else {
+        Serial.println("Sensor connected, but failed to enter command mode");
+      }
     }
-    
+  }
+
+  
+  if (newCommand)
+  {    
     switch (serialCommand[0])
     {
       case 'a':
-        if (hihSensor.changeAddress((uint8_t)atoi(trimmedData)))
+        if (hihSensor.changeAddress((uint8_t)atoi(serialData)))
         {
-          Serial.println("Sensor I2C address changed to " + String(trimmedData));
+          Serial.println("Sensor I2C address changed to " + String(serialData));
           Serial.println("Remember to restart (power off then on) the sensor for the changes to take place.");
         }
         else
         {
           Serial.println("Something went wrong..");
         }
+        break;
 
-        serialCommand[0] = 'i';
+      case 'g':
+        uint16_t storedAddress;
+        if (storedAddress = hihSensor.readAddress()) {
+          Serial.println("Address in register: " + String(storedAddress, BIN));
+        } else {
+          Serial.println("Something went wrong..");
+        }
         break;
 
       case 'u':
-        if (hihSensor.changeAlarmHighOn(atof(trimmedData)))
+        if (hihSensor.changeAlarmHighOn(atof(serialData)))
         {
-          Serial.println("The upper limit of the zone that triggers the high alarm (Alarm_High_On) has been changed to " + String(trimmedData));
+          Serial.println("The upper limit of the zone that triggers the high alarm (Alarm_High_On) has been changed to " + String(serialData));
         }
         else
         {
           Serial.println("Something went wrong..");
         }
-
-        serialCommand[0] = 'i';
         break;
         
       case 'i':
-        if (hihSensor.changeAlarmHighOff(atof(trimmedData)))
+        if (hihSensor.changeAlarmHighOff(atof(serialData)))
         {
-          Serial.println("The lower limit of the zone that triggers the high alarm (Alarm_High_Off) has been changed to " + String(trimmedData));
+          Serial.println("The lower limit of the zone that triggers the high alarm (Alarm_High_Off) has been changed to " + String(serialData));
         }
         else
         {
           Serial.println("Something went wrong..");
         }
-
-        serialCommand[0] = 'i';
         break;
 
       case 'k':
-        if (hihSensor.changeAlarmLowOn(atof(trimmedData)))
+        if (hihSensor.changeAlarmLowOn(atof(serialData)))
         {
-          Serial.println("The lower limit of the zone that triggers the low alarm (Alarm_Low_On) has been changed to " + String(trimmedData));
+          Serial.println("The lower limit of the zone that triggers the low alarm (Alarm_Low_On) has been changed to " + String(serialData));
         }
         else
         {
           Serial.println("Something went wrong..");
         }
-
-        serialCommand[0] = 'i';
         break;
 
       case 'l':
-        if (hihSensor.changeAlarmLowOff(atof(trimmedData)))
+        if (hihSensor.changeAlarmLowOff(atof(serialData)))
         {
-          Serial.println("The upper limit of the zone that triggers the low alarm (Alarm_Low_Off) has been changed to " + String(trimmedData));
+          Serial.println("The upper limit of the zone that triggers the low alarm (Alarm_Low_Off) has been changed to " + String(serialData));
         }
         else
         {
           Serial.println("Something went wrong..");
         }
-
-        serialCommand[0] = 'i';
         break;
-      
+
+      case 'c':
+        if (inCommandMode) {
+          Serial.println("In command mode");
+        } else {
+          Serial.println("Not in command mode");
+        }
+        break;
+        
       default:
         Serial.println("Invalid command");
-
-        serialCommand[0] = 'i';
         break;
     }
+    
+    serialCommand[0] = 'q'; // Idle state
+    newCommand = false;
   }
 }
 
 void serialEvent() {
-  serialCommand[0] = Serial.read();
-  readData = 0;
-  
-  while (Serial.available() && readData < 6)
-  {
-    serialData[readData] = Serial.read();
-    readData++;
+  // Check if the incoming byte is actually a command, or just extra numbers from a previous command
+  if (!isDigit(Serial.peek()) && Serial.peek() != '\n') {
+    serialCommand[0] = Serial.read();
+    memset(serialData, '\0', sizeof(serialData)); // Empty the array
+    Serial.readBytesUntil('\n', serialData, 6);
+    newCommand = true;
+  } else {
+    // Grab the buffer, but don't store it anywhere
+    Serial.read();
   }
-  
-  newCommand = true;
 }
