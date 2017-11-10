@@ -62,47 +62,47 @@ class HIH8000Command_I2C  {
   
   private:
     // Command bytes affecting the command mode itself
-    const uint8_t COMMAND_START_                          = 0xA0;
-    const uint8_t COMMAND_EXIT_                           = 0x80;
+    static const uint8_t COMMAND_START_                          = 0xA0;
+    static const uint8_t COMMAND_EXIT_                           = 0x80;
   
     // Command bytes for reading
-    const uint8_t COMMAND_READ_ALARM_HIGH_ON_             = 0x18;
-    const uint8_t COMMAND_READ_ALARM_HIGH_OFF_            = 0x19;
-    const uint8_t COMMAND_READ_ALARM_LOW_ON_              = 0x1A;
-    const uint8_t COMMAND_READ_ALARM_LOW_OFF_             = 0x1B;
-    const uint8_t COMMAND_READ_CUSTCONFIG_                = 0x1C;
+    static const uint8_t COMMAND_READ_ALARM_HIGH_ON_             = 0x18;
+    static const uint8_t COMMAND_READ_ALARM_HIGH_OFF_            = 0x19;
+    static const uint8_t COMMAND_READ_ALARM_LOW_ON_              = 0x1A;
+    static const uint8_t COMMAND_READ_ALARM_LOW_OFF_             = 0x1B;
+    static const uint8_t COMMAND_READ_CUSTCONFIG_                = 0x1C;
     
     // Command bytes for writing (Add 0x40 to the read command bytes)
-    const uint8_t COMMAND_WRITE_ALARM_HIGH_ON_            = 0x58;
-    const uint8_t COMMAND_WRITE_ALARM_HIGH_OFF_           = 0x59;
-    const uint8_t COMMAND_WRITE_ALARM_LOW_ON_             = 0x5A;
-    const uint8_t COMMAND_WRITE_ALARM_LOW_OFF_            = 0x5B;
-    const uint8_t COMMAND_WRITE_CUSTCONFIG_               = 0x5C;
+    static const uint8_t COMMAND_WRITE_ALARM_HIGH_ON_            = 0x58;
+    static const uint8_t COMMAND_WRITE_ALARM_HIGH_OFF_           = 0x59;
+    static const uint8_t COMMAND_WRITE_ALARM_LOW_ON_             = 0x5A;
+    static const uint8_t COMMAND_WRITE_ALARM_LOW_OFF_            = 0x5B;
+    static const uint8_t COMMAND_WRITE_CUSTCONFIG_               = 0x5C;
     
     // Data bytes for completing the 4-byte package when sending single command bytes
-    const uint16_t DATA_DUMMY_                            = 0x0000; // 0000 0000 0000 0000
+    static const uint16_t DATA_DUMMY_                            = 0x0000; // 0000 0000 0000 0000
     
     // For removing the address information from the customer config register bytes
-    const uint16_t DATA_ADDRESS_CLEAR_                    = 0xFF80; // 1111 1111 1000 0000
+    static const uint16_t DATA_ADDRESS_CLEAR_                    = 0xFF80; // 1111 1111 1000 0000
     
     // Data bytes for alarm settings (2 bytes)
-    const uint16_t DATA_ALARM_LOW_POLARITY_ACTIVELOW_     = 0x0040; // 0000 0000 0100 0000
-    const uint16_t DATA_ALARM_LOW_POLARITY_ACTIVEHIGH_    = 0xFFBF; // 1111 1111 1011 1111
-    const uint16_t DATA_ALARM_LOW_OUTPUT_OPENDRAIN_       = 0x0080; // 0000 0000 1000 0000
-    const uint16_t DATA_ALARM_LOW_OUTPUT_PUSHPULL_        = 0xFF7F; // 1111 1111 0111 1111
-    const uint16_t DATA_ALARM_HIGH_POLARITY_ACTIVELOW_    = 0x0100; // 0000 0001 0000 0000
-    const uint16_t DATA_ALARM_HIGH_POLARITY_ACTIVEHIGH_   = 0xFEFF; // 1111 1110 1111 1111
-    const uint16_t DATA_ALARM_HIGH_OUTPUT_OPENDRAIN_      = 0x0200; // 0000 0010 0000 0000
-    const uint16_t DATA_ALARM_HIGH_OUTPUT_PUSHPULL_       = 0xFDFF; // 1111 1101 1111 1111
+    static const uint16_t DATA_ALARM_LOW_POLARITY_ACTIVELOW_     = 0x0040; // 0000 0000 0100 0000
+    static const uint16_t DATA_ALARM_LOW_POLARITY_ACTIVEHIGH_    = 0xFFBF; // 1111 1111 1011 1111
+    static const uint16_t DATA_ALARM_LOW_OUTPUT_OPENDRAIN_       = 0x0080; // 0000 0000 1000 0000
+    static const uint16_t DATA_ALARM_LOW_OUTPUT_PUSHPULL_        = 0xFF7F; // 1111 1111 0111 1111
+    static const uint16_t DATA_ALARM_HIGH_POLARITY_ACTIVELOW_    = 0x0100; // 0000 0001 0000 0000
+    static const uint16_t DATA_ALARM_HIGH_POLARITY_ACTIVEHIGH_   = 0xFEFF; // 1111 1110 1111 1111
+    static const uint16_t DATA_ALARM_HIGH_OUTPUT_OPENDRAIN_      = 0x0200; // 0000 0010 0000 0000
+    static const uint16_t DATA_ALARM_HIGH_OUTPUT_PUSHPULL_       = 0xFDFF; // 1111 1101 1111 1111
     
     // Data bytes for startup time
-    const uint16_t DATA_STARTUP_3MS_                      = 0x1000; // 0001 0000 0000 0000
-    const uint16_t DATA_STARTUP_10MS_                     = 0xEFFF; // 1110 1111 1111 1111
+    static const uint16_t DATA_STARTUP_3MS_                      = 0x1000; // 0001 0000 0000 0000
+    static const uint16_t DATA_STARTUP_10MS_                     = 0xEFFF; // 1110 1111 1111 1111
   
     // This are used when fetching data. The sensor sends 3 bytes if we're reading a register; 1 byte if we're writing to a register.
     // The first byte is always the status+diagnostic+response byte.
-    const uint8_t RESPONSEBYTECOUNT_READ_    = 3;
-    const uint8_t RESPONSEBYTECOUNT_WRITE_   = 1;
+    static const uint8_t RESPONSEBYTECOUNT_READ_    = 3;
+    static const uint8_t RESPONSEBYTECOUNT_WRITE_   = 1;
     
     // Internal variables
     bool addressSet_        = false;
