@@ -40,12 +40,13 @@ class HIH8000Command_I2C  {
     bool begin();
     void end();
     
-    // Functions for reading some of the registers in the sensor (ignoring the non-mutable ones and the customer config)
+    // Functions for reading some of the registers in the sensor (ignoring the non-mutable ones)
     float readAlarmHighOn();
     float readAlarmHighOff();
     float readAlarmLowOn();
     float readAlarmLowOff();
-    // Possible TODO: add functions to read from customer config register.
+	uint16_t readAddress();
+    // Possible TODO: add functions to read from other parts of the customer config register.
     
     // Functions for changing the registers in the sensor
     bool changeAlarmHighOn(float humidityValue);

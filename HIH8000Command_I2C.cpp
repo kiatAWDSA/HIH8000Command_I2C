@@ -69,8 +69,8 @@ bool HIH8000Command_I2C::begin() {
   
   // Check if sensor is in Command mode
   if (statusByte & 0x80) {
-    return true;
     inCommandMode_ = true;
+    return true;
   } else {
     return false;
   }
@@ -132,6 +132,18 @@ float HIH8000Command_I2C::readAlarmLowOff() {
   }
 }
 
+// Get the sensor address stored in the customer config register (might not be the actual address if the sensor hasn't been restarted)
+uint16_t HIH8000Command_I2C::readAddress() {
+  uint16_t dataBytes;
+  
+  if (readCustConfig(dataBytes)) {
+    //return (dataBytes & 0x7F);
+	return dataBytes;
+  } else {
+    return 100; // TODO: document this?
+  }
+}
+
 // Change the upper limit of the zone that triggers the high alarm.
 bool HIH8000Command_I2C::changeAlarmHighOn(float humidity) {
   uint16_t dataBytes = humidityToBits(humidity); 
@@ -164,7 +176,6 @@ bool HIH8000Command_I2C::changeAddress(uint8_t newAddress) {
     
     if (readCustConfig(dataBytes)) {
       dataBytes = dataBytes & DATA_ADDRESS_CLEAR_;
-      
       return writeRegister(COMMAND_WRITE_CUSTCONFIG_, dataBytes, newAddress, true);
     } else {
       return false;
@@ -276,10 +287,9 @@ bool HIH8000Command_I2C::readRegister(uint8_t command, uint16_t& dataBytes) {
       Wire.requestFrom(address_, RESPONSEBYTECOUNT_READ_);
       statusByte = Wire.read();
       
-      // Check if sensor is still busy
+      // Check if sensor is no longer busy
       if (statusByte & 0x03) {
         sensorBusy_ = false;
-      } else {
         // Read the data bytes
         dataBytes = Wire.read();
         dataBytes <<= 8;
