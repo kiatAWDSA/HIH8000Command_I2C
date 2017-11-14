@@ -10,12 +10,25 @@
   *************************************************************************************
   *                               INSTRUCTIONS                                        *
   *************************************************************************************
+  0. In the first few lines of the code below, replace the argument in the following line:
+                HIH8000Command_I2C hihSensor = HIH8000Command_I2C(0x27);
+     with the address of your sensor in hexadecimal form. The default address of all 
+     HIH8000 sensors is 0x27.
   1. Connect your sensor according to the recommended layout in pg10 of the datasheet
      linked above. Make sure the SDA and SCL pins of the sensor are connected to the
      appropriate pins on your Arduino board (see above link to the Wire documentation).
-  2. Connect >220 Ohm resistor between pin 7 and the 3V line (so it forms parallel
-     connection with the HIH8000 sensor).
-  3. Open your serial monitor and send any of the following commands:
+     DO NOT connect the Vdd pin of the sensor the the Arduino 3.3 V pin yet!!
+  2. Connect >220 Ohm resistor between pin 7 and the 3.3V line so it forms a parallel
+     connection with the HIH8000 sensor. Do not connect this 3.3 V line to the Arduino
+     3.3 V pin yet!!
+  3. Connect the Arduino to your computer and upload the program. Open the serial monitor.
+  4. With the serial monitor open, connect the 3.3 V pin of your Arduino to the connection
+     shared between the sensor Vdd pin and the 220 Ohm resistor to pin 7. The moment you
+     connect it, the serial monitor should come up with a message "Entered command mode".
+     If you get the message "Sensor connected, but failed to enter command mode", disconnect
+     the Arduino from computer and check your connections again.
+  5. Send any of the following commands via the serial monitor:
+        g         : Get the current I2C address of the sensor.
         aXXX      : Change the I2C address of the sensor to XXX (Must be <= 127).
         uXXX.XX   : Change the upper limit of the zone that triggers the high alarm
                     (Alarm_High_On) to XXX.XX. 0 <= XXX.XX <= 100. Max 2 decimal places.
@@ -25,6 +38,8 @@
                     (Alarm_Low_On) to XXX.XX. 0 <= XXX.XX <= 100. Max 2 decimal places.
         lXXX.XX   : Change the upper limit of the zone that triggers the low alarm
                     (Alarm_Low_Off) to XXX.XX. 0 <= XXX.XX <= 100. Max 2 decimal places.
+  6. Whenever you made a change to the sensor settings and want to see the new changes, you need
+     to disconnect the sensor from the power, and reconnect it.
 
   If you get a message saying something went wrong, either you gave a value that doesn't
   satisfy the constraints stated above, the sensor did not enter the command mode, something
@@ -53,8 +68,10 @@
 HIH8000Command_I2C hihSensor = HIH8000Command_I2C(0x27);
 
 bool inCommandMode = false;
+bool failedCommandMode = false;
 bool newCommand = false;
 byte readData = 0;
+byte startupDetectPin = 7; // Pin that is parallel to the 3.3 V line of the sensor. Detects when the sensor receives power
 char serialCommand[2];
 char serialData[7];
 
@@ -69,15 +86,17 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if (!inCommandMode)
+  if (!inCommandMode && !failedCommandMode)
   {
-    if (digitalRead(7)) {
+    if (digitalRead(startupDetectPin)) {
       inCommandMode = hihSensor.begin();
 
       if (inCommandMode) {
         Serial.println("Entered command mode");
       } else {
-        Serial.println("Sensor connected, but failed to enter command mode");
+        failedCommandMode = true;
+        Serial.println("Failed to enter command mode.");
+        Serial.println("Either the given sensor address is wrong or the time window for entering command window has passed.");
       }
     }
   }
@@ -101,8 +120,10 @@ void loop() {
 
       case 'g':
         uint16_t storedAddress;
-        if (storedAddress = hihSensor.readAddress()) {
-          Serial.println("Address in register: " + String(storedAddress, BIN));
+        storedAddress = hihSensor.readAddress();
+        if (storedAddress <= 127) {
+          Serial.println("Address in register (binary form): " + String(storedAddress, BIN));
+          Serial.println("Address in register (decimal form): " + String(storedAddress, DEC));
         } else {
           Serial.println("Something went wrong..");
         }

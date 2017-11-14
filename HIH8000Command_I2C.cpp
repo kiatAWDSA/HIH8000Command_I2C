@@ -62,15 +62,27 @@ bool HIH8000Command_I2C::begin() {
   Wire.write(COMMAND_START_);
   Wire.write(DATA_DUMMY_);
   Wire.write(DATA_DUMMY_);
-  Wire.endTransmission();
   
-  Wire.requestFrom(address_, RESPONSEBYTECOUNT_WRITE_);
-  statusByte = Wire.read();
-  
-  // Check if sensor is in Command mode
-  if (statusByte & 0x80) {
-    inCommandMode_ = true;
-    return true;
+  if (Wire.endTransmission() == 0) { // Should return 0 if success, otherwise something is wrong
+    while (sensorBusy_) {
+      if (Wire.requestFrom(address_, RESPONSEBYTECOUNT_WRITE_) == RESPONSEBYTECOUNT_WRITE_) { // Should return RESPONSEBYTECOUNT_READ_ byte(s), otherwise something is wrong
+        statusByte = Wire.read();
+        // Check if sensor is still busy
+        if (statusByte & 0x03) {
+          sensorBusy_ = false;
+          
+          // Check if sensor is in Command mode
+          if (statusByte & 0x80) {
+            inCommandMode_ = true;
+            return true;
+          } else {
+            return false;
+          }
+        }
+      } else {
+        return false;
+      }
+    }
   } else {
     return false;
   }
@@ -137,10 +149,9 @@ uint16_t HIH8000Command_I2C::readAddress() {
   uint16_t dataBytes;
   
   if (readCustConfig(dataBytes)) {
-    //return (dataBytes & 0x7F);
-	return dataBytes;
+    return (dataBytes & 0x7F);
   } else {
-    return 100; // TODO: document this?
+    return 1000; // User should check if returned address is between 0 and 127, inclusive. Otherwise, there is an error.
   }
 }
 
@@ -281,29 +292,36 @@ bool HIH8000Command_I2C::readRegister(uint8_t command, uint16_t& dataBytes) {
     Wire.write(command);
     Wire.write(DATA_DUMMY_); // Implicitly converted to one byte
     Wire.write(DATA_DUMMY_); // Implicitly converted to one byte
-    Wire.endTransmission();
     
-    while (sensorBusy_) {
-      Wire.requestFrom(address_, RESPONSEBYTECOUNT_READ_);
-      statusByte = Wire.read();
-      
-      // Check if sensor is no longer busy
-      if (statusByte & 0x03) {
-        sensorBusy_ = false;
-        // Read the data bytes
-        dataBytes = Wire.read();
-        dataBytes <<= 8;
-        uint8_t readBuffer = Wire.read();
-        dataBytes = dataBytes | readBuffer;
+    if (Wire.endTransmission() == 0) { // Should return 0 if success, otherwise something is wrong
+      while (sensorBusy_) {
+        if (Wire.requestFrom(address_, RESPONSEBYTECOUNT_READ_) == RESPONSEBYTECOUNT_READ_) { // Should return RESPONSEBYTECOUNT_READ_ byte(s), otherwise something is wrong
+          statusByte = Wire.read();
+          // Check if sensor is no longer busy
+          if (statusByte & 0x03) {
+            sensorBusy_ = false;
+            // Read the data bytes
+            dataBytes = Wire.read();
+            dataBytes <<= 8;
+            uint8_t readBuffer = Wire.read();
+            dataBytes = dataBytes | readBuffer;
+          }
+        } else {
+          return false;
+        }
       }
-    }
-    
-    // Extract response bit for "positive acknowledge"
-    if (statusByte & 0x01) {
-      return true;
+      
+      // Extract response bit for "positive acknowledge"
+      if (statusByte & 0x01) {
+        return true;
+      } else {
+        return false;
+      }
     } else {
       return false;
     }
+  } else {
+    return false;
   }
 }
 
@@ -327,24 +345,32 @@ bool HIH8000Command_I2C::writeRegister(uint8_t command, uint16_t oldDataBytes, u
     Wire.write(command);
     Wire.write(dataByte1);
     Wire.write(dataByte2);
-    Wire.endTransmission();
     
-    while (sensorBusy_) {
-      Wire.requestFrom(address_, RESPONSEBYTECOUNT_WRITE_);
-      statusByte = Wire.read();
-      
-      // Check if sensor is still busy
-      if (statusByte & 0x03) {
-        sensorBusy_ = false;
+    if (Wire.endTransmission() == 0) { // Should return 0 if success, otherwise something is wrong
+      while (sensorBusy_) {
+        if (Wire.requestFrom(address_, RESPONSEBYTECOUNT_WRITE_) == RESPONSEBYTECOUNT_WRITE_) { // Should return RESPONSEBYTECOUNT_WRITE_ byte(s), otherwise something is wrong
+          statusByte = Wire.read();
+          
+          // Check if sensor is still busy
+          if (statusByte & 0x03) {
+            sensorBusy_ = false;
+          }
+        } else {
+          return false;
+        }
       }
-    }
-    
-    // Extract response bit for "positive acknowledge"
-    if (statusByte & 0x01) {
-      return true;
+      
+      // Extract response bit for "positive acknowledge"
+      if (statusByte & 0x01) {
+        return true;
+      } else {
+        return false;
+      }
     } else {
       return false;
     }
+  } else {
+    return false;
   }
 }
 
